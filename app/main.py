@@ -22,11 +22,19 @@ def handle_connection(client_socket, addr):
             user_agent = user_agent_string.split(" ")[1].strip()
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
 
-        if len(path_data) > 2:
+        elif path == "files":
+            with open(f"/tmp/{path_data[2].strip()}", "rb") as f:
+                file_contents = f.read()
+                no_of_bytes = len(file_contents)
+                response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {no_of_bytes}\r\n\r\n{file_contents}"
+
+        if path != "files" and len(path_data) > 2:
             param = path_data[2].strip()
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(param)}\r\n\r\n{param}"
 
     client_socket.send(response.encode("utf-8"))
+    print(f"connection closed from {addr}")
+    client_socket.close()
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
