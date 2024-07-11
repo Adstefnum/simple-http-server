@@ -59,11 +59,14 @@ def handle_connection(client_socket, addr):
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(param)}\r\n\r\n{param}"
 
         if encoding_string:
-            encoding = encoding_string.split(" ")[1].strip()
-            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: {encoding}\r\n\r\n"
-
-        if encoding_string and encoding == "invalid-encoding":
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"
+            encodings_concated = encoding_string.split(":")[1]
+            encodings = [s.strip() for s in encodings_concated.split(",")]
+            print(encodings)
+            if not "gzip" in encodings:
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"
+                
+            else:
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"
 
     client_socket.send(response.encode("utf-8"))
     print(f"connection closed from {addr}")
