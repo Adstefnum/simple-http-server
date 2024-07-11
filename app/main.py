@@ -4,6 +4,7 @@ import re
 import threading
 import os
 import argparse
+import gzip
 
 def handle_connection(client_socket, addr):
     parser = argparse.ArgumentParser(description='HTTP Server')
@@ -24,6 +25,7 @@ def handle_connection(client_socket, addr):
     elif re.match(r"/[a-z]+", request_data[1]):
         path_data = request_data[1].split("/")
         path = path_data[1].strip()
+        encoding_string = next((s for s in data_breakdown if re.match(r"Accept-Encoding: (.*)", s)), None)
 
         if path == "user-agent":
             user_agent_string = next((s for s in data_breakdown if re.match(r"User-Agent: (.*)", s)), None)
@@ -55,6 +57,10 @@ def handle_connection(client_socket, addr):
         if path != "files" and len(path_data) > 2:
             param = path_data[2].strip()
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(param)}\r\n\r\n{param}"
+
+        if encoding_string:
+            encoding = encoding_string.split(" ")[1].strip()
+            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: {encoding}\r\n\r\n"
 
     client_socket.send(response.encode("utf-8"))
     print(f"connection closed from {addr}")
