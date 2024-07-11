@@ -7,7 +7,7 @@ import argparse
 
 def handle_connection(client_socket, addr):
     parser = argparse.ArgumentParser(description='HTTP Server')
-    parser.add_argument('--directory', required=True, help='Directory where files are stored')
+    parser.add_argument('--directory',  help='Directory where files are stored')
 
     args = parser.parse_args()
     directory = args.directory
