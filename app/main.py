@@ -30,7 +30,7 @@ def handle_connection(client_socket, addr):
             user_agent = user_agent_string.split(" ")[1].strip()
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
 
-        elif path == "files":
+        elif path == "files" and request_data[0] == "GET":
             filename = path_data[2].strip()
             file_path = os.path.join(directory, filename)
 
@@ -41,6 +41,16 @@ def handle_connection(client_socket, addr):
                     response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {no_of_bytes}\r\n\r\n" + file_contents.decode("utf-8")
             else:
                 response = "HTTP/1.1 404 Not Found\r\n\r\nFile Not Found"
+
+        elif path == "files" and request_data[0] == "POST":
+            filename = path_data[2].strip()
+            file_path = os.path.join(directory, filename)
+
+            file_contents = data_breakdown[-1].encode("utf-8")
+            with open(file_path, "wb") as f:
+                f.write(file_contents)
+
+            response = "HTTP/1.1 201 Created\r\n\r\n"
 
         if path != "files" and len(path_data) > 2:
             param = path_data[2].strip()
