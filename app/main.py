@@ -12,8 +12,13 @@ def main():
         client_socket, addr = server_socket.accept()
 
         data = client_socket.recv(1024)
+        data_breadkdown  = data.decode("utf-8").split(" ")
 
-        response = "HTTP/1.1 200 OK\r\n\r\n"
+        if data_breadkdown[1] == "/":
+            response = "HTTP/1.1 200 OK\r\n\r\n"
+
+        else:
+            response = "HTTP/1.1 404 Not Found\r\n\r\n"
 
         client_socket.send(response.encode("utf-8"))
         server_socket.close()
