@@ -6,7 +6,7 @@ import re
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!")
-
+    response = "HTTP/1.1 404 Not Found\r\n\r\n"
     server_socket = socket.create_server(("localhost", 4221))
 
     while True:
@@ -31,9 +31,6 @@ def main():
             if len(path_data) > 2:
                 param = path_data[2].strip()
                 response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(param)}\r\n\r\n{param}"
-
-        else:
-            response = "HTTP/1.1 404 Not Found\r\n\r\n"
 
         client_socket.send(response.encode("utf-8"))
         server_socket.close()
