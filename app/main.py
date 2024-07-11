@@ -7,6 +7,7 @@ import argparse
 import gzip
 
 def handle_connection(client_socket, addr):
+    encoded = False
     parser = argparse.ArgumentParser(description='HTTP Server')
     parser.add_argument('--directory',  help='Directory where files are stored')
 
@@ -61,14 +62,17 @@ def handle_connection(client_socket, addr):
         if encoding_string:
             encodings_concated = encoding_string.split(":")[1]
             encodings = [s.strip() for s in encodings_concated.split(",")]
-            print(encodings)
             if not "gzip" in encodings:
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"
                 
             else:
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\n\r\n"
+                compressed_data = gzip.compress(param.encode("utf-8"))
+                response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:{len(compressed_data)}\r\nContent-Encoding: gzip\r\n\r\n".encode("utf-8") + compressed_data
+                encoded = True
 
-    client_socket.send(response.encode("utf-8"))
+    if not encoded:
+        response = response.encode("utf-8")
+    client_socket.send(response)
     print(f"connection closed from {addr}")
     client_socket.close()
 
