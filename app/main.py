@@ -2,8 +2,16 @@
 import socket
 import re
 import threading
+import os
+import argparse
 
 def handle_connection(client_socket, addr):
+    parser = argparse.ArgumentParser(description='HTTP Server')
+    parser.add_argument('--directory', required=True, help='Directory where files are stored')
+
+    args = parser.parse_args()
+    directory = args.directory
+
     print(f"connection received from {addr}")
     response = "HTTP/1.1 404 Not Found\r\n\r\n"
     data = client_socket.recv(1024)
@@ -23,10 +31,16 @@ def handle_connection(client_socket, addr):
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
 
         elif path == "files":
-            with open(f"/tmp/{path_data[2].strip()}", "rb") as f:
-                file_contents = f.read()
-                no_of_bytes = len(file_contents)
-                response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {no_of_bytes}\r\n\r\n{file_contents}"
+            filename = path_data[2].strip()
+            file_path = os.path.join(directory, filename)
+
+            if os.path.exists(file_path):
+                with open(file_path, "rb") as f:
+                    file_contents = f.read()
+                    no_of_bytes = len(file_contents)
+                    response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {no_of_bytes}\r\n\r\n" + file_contents.decode("utf-8")
+            else:
+                response = "HTTP/1.1 404 Not Found\r\n\r\nFile Not Found"
 
         if path != "files" and len(path_data) > 2:
             param = path_data[2].strip()
